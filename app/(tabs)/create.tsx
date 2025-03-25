@@ -1,9 +1,9 @@
 import { View, Text } from "react-native";
 
-export default function Profile() {
+export default function Create() {
   return (
     <View>
-      <Text>Welcome to profile page</Text>
+      <Text>create</Text>
     </View>
   );
 }
