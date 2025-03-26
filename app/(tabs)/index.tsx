@@ -6,7 +6,6 @@ export default function Index() {
   // return <Redirect href="/(tabs)" />;
   return (
     <View style={styles.container}>
-      <Text>index</Text>
       <TouchableOpacity style={styles.button} onPress={() => alert("hello")}>
         <Text>click me</Text>
       </TouchableOpacity>
@@ -16,8 +15,7 @@ export default function Index() {
       </View>
       <Link
         style={{
-          color: "blue",
-          boxShadow: "0 0 0 1px blue",
+          boxShadow: "0 0 5px black",
           padding: 10,
           margin: 10,
           borderRadius: 5,

@@ -1,0 +1,15 @@
+export const COLORS = {
+  primary: "rgb(148, 255, 155)",
+  secondary: "#002651",
+  background: "black",
+  surface: "#000",
+  surfaceLight: "#F0F0F0",
+  surfaceDark: "#E0E0E0",
+  accent: "#FFD700",
+  white: "#FFFFFF",
+  grey: "#808080",
+  black: "#000000",
+  lightGray: "#D3D3D3",
+  darkGray: "#A9A9A9",
+  transparent: "transparent",
+};
