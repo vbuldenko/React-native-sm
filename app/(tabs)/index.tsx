@@ -33,7 +33,7 @@ export default function Index() {
         onPress={() => signOut()}
         style={{ padding: 10, backgroundColor: "white" }}
       >
-        <Text>click me</Text>
+        <Text>Sign Out</Text>
       </TouchableOpacity>
     </View>
   );
