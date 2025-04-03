@@ -1,21 +1,6 @@
 import { ConvexError, v } from "convex/values";
-import { mutation } from "./_generated/server";
-
-// export const generateUploadUrl = mutation(async (ctx) => {
-//   let identity;
-//   try {
-//     console.log("Calling getUserIdentity...");
-//     identity = await ctx.auth.getUserIdentity();
-//   } catch (error) {
-//     throw new Error("Not authenticated");
-//   }
-
-//   if (!identity) {
-//     throw new Error("Not authenticated");
-//   }
-
-//   return await ctx.storage.generateUploadUrl();
-// });
+import { mutation, query } from "./_generated/server";
+import { getAuthenticatedUser } from "./users";
 
 export const generateUploadUrl = mutation({
   handler: async (ctx) => {
@@ -68,19 +53,8 @@ export const createPost = mutation({
   },
 
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      throw new Error("Not authorized");
-    }
-
-    const currentUser = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-      .first();
-
-    if (!currentUser) {
-      throw new Error("User not found");
-    }
+    // Check authentication
+    const currentUser = await getAuthenticatedUser(ctx);
 
     const imageUrl = await ctx.storage.getUrl(args.storageId);
     if (!imageUrl) {
@@ -103,5 +77,19 @@ export const createPost = mutation({
     });
 
     return post;
+  },
+});
+
+export const getFeedPosts = query({
+  handler: async (ctx) => {
+    const currentUser = await getAuthenticatedUser(ctx);
+
+    const posts = await ctx.db.query("posts").order("desc").collect();
+
+    if (posts.length === 0) {
+      return [];
+    }
+
+    return posts;
   },
 });
