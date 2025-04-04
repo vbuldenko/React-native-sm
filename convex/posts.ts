@@ -90,6 +90,41 @@ export const getFeedPosts = query({
       return [];
     }
 
-    return posts;
+    // Get all posts extended with author and like/bookmark status
+    const extendedPosts = await Promise.all(
+      posts.map(async (post) => {
+        const author = await ctx.db.get(post.userId);
+
+        const like = await ctx.db
+          .query("likes")
+          .withIndex("by_user_and_post", (q) =>
+            q.eq("userId", currentUser._id).eq("postId", post._id)
+          )
+          .first();
+
+        const bookmark = await ctx.db
+          .query("bookmarks")
+          .withIndex("by_user_and_post", (q) =>
+            q.eq("userId", currentUser._id).eq("postId", post._id)
+          )
+          .first();
+
+        // const comments = await ctx.db
+        //   .query("comments")
+        //   .withIndex("by_post", (q) => q.eq("postId", post._id))
+        //   .collect();
+
+        // const isLiked = likes.some((like) => like.userId === currentUser._id);
+
+        return {
+          ...post,
+          author,
+          isLiked: !!like,
+          isBookmarked: !!bookmark,
+        };
+      })
+    );
+
+    return extendedPosts;
   },
 });
