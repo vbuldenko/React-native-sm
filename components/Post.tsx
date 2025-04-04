@@ -1,11 +1,17 @@
 import { COLORS } from "@/constants/theme";
+import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
+import { toggleLike } from "@/convex/posts";
 import { User } from "@/convex/users";
 import { styles } from "@/styles/feed.styles";
 import { Ionicons } from "@expo/vector-icons";
+import { useMutation } from "convex/react";
 import { Image } from "expo-image";
 import { Link } from "expo-router";
+import { useState } from "react";
 import { View, Text, TouchableOpacity } from "react-native";
+import CommentsModal from "./CommentsModal";
+import { formatDistanceToNow } from "date-fns";
 
 type PostProps = {
   post: {
@@ -22,6 +28,23 @@ type PostProps = {
 };
 
 export default function Post({ post }: PostProps) {
+  const [likes, setLikes] = useState(post.likes);
+  const [isLiked, setIsLiked] = useState(post.isLiked);
+  const [comments, setComments] = useState(post.comments);
+  const [showComments, setShowComments] = useState(false);
+
+  const toggleLike = useMutation(api.posts.toggleLike);
+
+  const handleLike = async () => {
+    try {
+      const res = await toggleLike({ postId: post._id });
+      setIsLiked(res);
+      setLikes((prev) => (res ? prev + 1 : prev - 1));
+    } catch (error) {
+      console.error("Error liking post:", error);
+    }
+  };
+
   return (
     <View style={styles.post}>
       {/* Post header */}
@@ -60,10 +83,14 @@ export default function Post({ post }: PostProps) {
       {/* Post Actions */}
       <View style={styles.postActions}>
         <View style={styles.postActionsLeft}>
-          <TouchableOpacity>
-            <Ionicons name="heart-outline" size={24} color={COLORS.white} />
+          <TouchableOpacity onPress={handleLike}>
+            <Ionicons
+              name={isLiked ? "heart" : "heart-outline"}
+              size={24}
+              color={isLiked ? COLORS.primary : COLORS.white}
+            />
           </TouchableOpacity>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={() => setShowComments(true)}>
             <Ionicons
               name="chatbubble-outline"
               size={22}
@@ -79,7 +106,11 @@ export default function Post({ post }: PostProps) {
 
       {/* Post Info */}
       <View style={styles.postInfo}>
-        <Text style={styles.likesText}>Be the first to like</Text>
+        <Text style={styles.likesText}>
+          {likes > 0
+            ? `${likes} like${likes > 1 ? "s" : ""}`
+            : "Be the first to like"}
+        </Text>
         {post.caption && (
           <View style={styles.captionContainer}>
             <Text style={styles.captionUsername}>{post.author.username}</Text>
@@ -87,14 +118,28 @@ export default function Post({ post }: PostProps) {
           </View>
         )}
 
-        <TouchableOpacity>
-          <Text style={styles.commentsText}>
-            View all {post.comments} comments
-          </Text>
-        </TouchableOpacity>
+        {comments > 0 && (
+          <TouchableOpacity onPress={() => setShowComments(true)}>
+            <Text style={styles.commentsText}>
+              View all {comments} comments
+            </Text>
+          </TouchableOpacity>
+        )}
 
-        <Text style={styles.timeAgo}>1 hour ago</Text>
+        <Text style={styles.timeAgo}>
+          {formatDistanceToNow(post._creationTime, { addSuffix: true })}
+        </Text>
       </View>
+
+      {/* Comments Section */}
+      <CommentsModal
+        postId={post._id}
+        isVisible={showComments}
+        onClose={() => setShowComments(false)}
+        onCommentAdded={() => {
+          setComments((prev) => prev + 1);
+        }}
+      />
     </View>
   );
 }

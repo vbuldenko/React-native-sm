@@ -1,4 +1,4 @@
-import { ScrollView, View } from "react-native";
+import { FlatList, ScrollView, View } from "react-native";
 import { styles } from "../../styles/auth.styles";
 import Header from "@/components/layout/Header";
 import Stories from "@/components/Stories";
@@ -17,16 +17,15 @@ export default function Index() {
   return (
     <View style={styles.container}>
       <Header />
-      <ScrollView
+
+      <FlatList
+        data={posts}
+        renderItem={({ item }) => <Post post={item} />}
+        keyExtractor={(item) => item._id.toString()}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 60 }}
-      >
-        <Stories />
-
-        {posts.map((post) => (
-          <Post key={post._id} post={post} />
-        ))}
-      </ScrollView>
+        ListHeaderComponent={<Stories />}
+      />
     </View>
   );
 }

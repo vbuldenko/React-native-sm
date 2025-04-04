@@ -10,7 +10,7 @@ export default function Header() {
   return (
     <View style={styles.header}>
       <Text style={styles.headerTitle}>mockgram</Text>
-      <TouchableOpacity onPress={() => signOut}>
+      <TouchableOpacity onPress={() => signOut()}>
         <Ionicons name="log-out-outline" size={24} color={COLORS.white} />
       </TouchableOpacity>
     </View>
