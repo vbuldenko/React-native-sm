@@ -1,3 +1,4 @@
+import { Id } from "./_generated/dataModel";
 import { mutation, QueryCtx, MutationCtx } from "./_generated/server";
 import { v } from "convex/values";
 
@@ -54,3 +55,17 @@ export async function getAuthenticatedUser(ctx: QueryCtx | MutationCtx) {
 
   return currentUser;
 }
+
+export type User = {
+  _id: Id<"users">;
+  _creationTime: number;
+  bio?: string | undefined;
+  image?: string | undefined;
+  username: string;
+  fullName: string;
+  email: string;
+  followers: number;
+  following: number;
+  posts: number;
+  clerkId: string;
+};

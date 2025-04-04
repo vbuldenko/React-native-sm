@@ -93,7 +93,7 @@ export const getFeedPosts = query({
     // Get all posts extended with author and like/bookmark status
     const extendedPosts = await Promise.all(
       posts.map(async (post) => {
-        const author = await ctx.db.get(post.userId);
+        const author = (await ctx.db.get(post.userId))!;
 
         const like = await ctx.db
           .query("likes")
