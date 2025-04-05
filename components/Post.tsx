@@ -12,6 +12,7 @@ import { useState } from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import CommentsModal from "./CommentsModal";
 import { formatDistanceToNow } from "date-fns";
+import { toggleBookmark } from "@/convex/bookmarks";
 
 type PostProps = {
   post: {
@@ -30,16 +31,26 @@ type PostProps = {
 export default function Post({ post }: PostProps) {
   const [likes, setLikes] = useState(post.likes);
   const [isLiked, setIsLiked] = useState(post.isLiked);
+  const [isBookmarked, setIsBookmarked] = useState(post.isBookmarked);
   const [comments, setComments] = useState(post.comments);
   const [showComments, setShowComments] = useState(false);
 
   const toggleLike = useMutation(api.posts.toggleLike);
+  const toggleBookmark = useMutation(api.bookmarks.toggleBookmark);
 
   const handleLike = async () => {
     try {
       const res = await toggleLike({ postId: post._id });
       setIsLiked(res);
       setLikes((prev) => (res ? prev + 1 : prev - 1));
+    } catch (error) {
+      console.error("Error liking post:", error);
+    }
+  };
+  const handleBookmark = async () => {
+    try {
+      const res = await toggleBookmark({ postId: post._id });
+      setIsBookmarked(res);
     } catch (error) {
       console.error("Error liking post:", error);
     }
@@ -99,8 +110,12 @@ export default function Post({ post }: PostProps) {
           </TouchableOpacity>
         </View>
 
-        <TouchableOpacity>
-          <Ionicons name="bookmark-outline" size={24} color={COLORS.white} />
+        <TouchableOpacity onPress={handleBookmark}>
+          <Ionicons
+            name={isBookmarked ? "bookmark" : "bookmark-outline"}
+            size={22}
+            color={COLORS.white}
+          />
         </TouchableOpacity>
       </View>
 
