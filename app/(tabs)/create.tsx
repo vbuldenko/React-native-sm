@@ -19,6 +19,7 @@ import * as FileSystem from "expo-file-system";
 import { Image } from "expo-image";
 import { useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
+import { set } from "date-fns";
 
 export default function CreateScreen() {
   const router = useRouter();
@@ -77,7 +78,9 @@ export default function CreateScreen() {
         storageId,
       });
 
-      console.log("Post created successfully:", postResult);
+      setSelectedImage(null);
+      setCaption("");
+      alert("Post shared successfully!");
 
       router.push("/(tabs)");
     } catch (error) {
