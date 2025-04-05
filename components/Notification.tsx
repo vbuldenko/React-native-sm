@@ -1,51 +1,12 @@
-import Loader from "@/components/layout/Loader";
 import { COLORS } from "@/constants/theme";
-import { api } from "@/convex/_generated/api";
 import { styles } from "@/styles/notification.styles";
 import { Ionicons } from "@expo/vector-icons";
-import { useQuery } from "convex/react";
-import { format, formatDistanceToNow } from "date-fns";
+import { formatDistanceToNow } from "date-fns";
 import { Image } from "expo-image";
 import { Link } from "expo-router";
-import { View, Text, FlatList, TouchableOpacity } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
 
-export default function Notification() {
-  const notifications = useQuery(api.notifications.getNotifications);
-
-  if (!notifications) return <Loader />;
-  if (notifications.length === 0) return <NotificationsEmpty />;
-
-  return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Notifications</Text>
-      </View>
-
-      <FlatList
-        data={notifications}
-        renderItem={({ item }) => <NotificationItem notification={item} />}
-        keyExtractor={(item) => item._id}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.listContainer}
-      />
-    </View>
-  );
-}
-
-function NotificationsEmpty() {
-  return (
-    <View
-      style={[
-        styles.container,
-        { justifyContent: "center", alignItems: "center" },
-      ]}
-    >
-      <Text style={{ color: COLORS.grey }}>No notifications yet.</Text>
-    </View>
-  );
-}
-
-function NotificationItem({ notification }: any) {
+export default function Notification({ notification }: any) {
   return (
     <View style={styles.notificationItem}>
       <View style={styles.notificationContent}>
