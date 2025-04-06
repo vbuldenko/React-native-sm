@@ -134,6 +134,7 @@ export default function Profile() {
               />
             </TouchableOpacity>
           )}
+          keyExtractor={(item) => item._id}
         />
       </ScrollView>
       {/* Edit profile Modal */}

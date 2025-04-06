@@ -2,6 +2,20 @@ import { Id } from "./_generated/dataModel";
 import { mutation, QueryCtx, MutationCtx, query } from "./_generated/server";
 import { v } from "convex/values";
 
+export const getUserProfile = query({
+  args: {
+    userId: v.id("users"),
+  },
+  handler: async (ctx, args) => {
+    const user = await ctx.db.get(args.userId);
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    return user;
+  },
+});
+
 export const createUser = mutation({
   args: {
     username: v.string(),
@@ -89,6 +103,74 @@ export const updateProfile = mutation({
     });
   },
 });
+
+export const isFollowing = query({
+  args: { followingId: v.id("users") },
+  handler: async (ctx, args) => {
+    const currentUser = await getAuthenticatedUser(ctx);
+
+    const following = await ctx.db
+      .query("follows")
+      .withIndex("by_both", (q) =>
+        q.eq("followerId", currentUser._id).eq("followingId", args.followingId)
+      )
+      .first();
+
+    return !!following;
+  },
+});
+
+export const toggleFollow = mutation({
+  args: {
+    followingId: v.id("users"),
+  },
+  handler: async (ctx, { followingId }) => {
+    const currentUser = await getAuthenticatedUser(ctx);
+
+    const following = await ctx.db
+      .query("follows")
+      .withIndex("by_both", (q) =>
+        q.eq("followerId", currentUser._id).eq("followingId", followingId)
+      )
+      .first();
+
+    if (following) {
+      await ctx.db.delete(following._id);
+      await updateFollowStats(ctx, currentUser._id, followingId, false);
+    } else {
+      await ctx.db.insert("follows", {
+        followerId: currentUser._id,
+        followingId,
+      });
+      await updateFollowStats(ctx, currentUser._id, followingId, true);
+
+      await ctx.db.insert("notifications", {
+        receiverId: followingId,
+        senderId: currentUser._id,
+        type: "follow",
+      });
+    }
+  },
+});
+
+async function updateFollowStats(
+  ctx: MutationCtx,
+  userId: Id<"users">,
+  followingUserId: Id<"users">,
+  increment: boolean
+) {
+  const user = await ctx.db.get(userId);
+  const followingUser = await ctx.db.get(followingUserId);
+
+  if (user && followingUser) {
+    await ctx.db.patch(userId, {
+      following: user.following + (increment ? 1 : -1),
+    });
+    await ctx.db.patch(followingUserId, {
+      followers: followingUser.followers + (increment ? 1 : -1),
+    });
+  }
+}
 
 export type User = {
   _id: Id<"users">;

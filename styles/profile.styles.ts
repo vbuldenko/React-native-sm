@@ -194,7 +194,8 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingVertical: 8,
     borderRadius: 8,
-    marginTop: 16,
+    flex: 1,
+    // marginTop: 16,
   },
   followingButton: {
     backgroundColor: COLORS.surface,
