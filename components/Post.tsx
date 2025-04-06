@@ -31,10 +31,8 @@ type PostProps = {
 
 export default function Post({ post }: PostProps) {
   const { user } = useUser(); // Current user from Clerk
-  const [likes, setLikes] = useState(post.likes);
   const [isLiked, setIsLiked] = useState(post.isLiked);
   const [isBookmarked, setIsBookmarked] = useState(post.isBookmarked);
-  const [comments, setComments] = useState(post.comments);
   const [showComments, setShowComments] = useState(false);
 
   const currentUser = useQuery(
@@ -49,7 +47,6 @@ export default function Post({ post }: PostProps) {
     try {
       const res = await toggleLike({ postId: post._id });
       setIsLiked(res);
-      setLikes((prev) => (res ? prev + 1 : prev - 1));
     } catch (error) {
       console.error("Error liking post:", error);
     }
@@ -149,8 +146,8 @@ export default function Post({ post }: PostProps) {
       {/* Post Info */}
       <View style={styles.postInfo}>
         <Text style={styles.likesText}>
-          {likes > 0
-            ? `${likes} like${likes > 1 ? "s" : ""}`
+          {post.likes > 0
+            ? `${post.likes} like${post.likes > 1 ? "s" : ""}`
             : "Be the first to like"}
         </Text>
         {post.caption && (
@@ -160,10 +157,10 @@ export default function Post({ post }: PostProps) {
           </View>
         )}
 
-        {comments > 0 && (
+        {post.comments > 0 && (
           <TouchableOpacity onPress={() => setShowComments(true)}>
             <Text style={styles.commentsText}>
-              View all {comments} comments
+              View all {post.comments} comments
             </Text>
           </TouchableOpacity>
         )}
@@ -178,9 +175,6 @@ export default function Post({ post }: PostProps) {
         postId={post._id}
         isVisible={showComments}
         onClose={() => setShowComments(false)}
-        onCommentAdded={() => {
-          setComments((prev) => prev + 1);
-        }}
       />
     </View>
   );
